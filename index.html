@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101718">
+    <meta name="description"
+        content="RoutePulse campus transport planning dashboard: simulated GPS ETAs, demand forecasts, disruption scenarios, and constraint-aware fleet planning.">
+    <title>RoutePulse — Campus mobility, in sync</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" aria-label="Main navigation">
+            <a class="brand" href="#overview" aria-label="RoutePulse home">
+                <span class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 36 36" fill="none">
+                        <path d="M8 25.5c4.4 0 4.4-15 9-15s4.6 15 9 15" stroke="currentColor" stroke-width="2.8"
+                            stroke-linecap="round" />
+                        <circle cx="8" cy="25.5" r="3" fill="currentColor" />
+                        <circle cx="27" cy="25.5" r="3" fill="currentColor" />
+                        <circle cx="17" cy="10.5" r="3" fill="currentColor" />
+                    </svg>
+                </span>
+                <span class="brand-name">route<span>pulse</span><small>CAMPUS MOBILITY</small></span>
+            </a>
+
+            <div class="workspace-switcher">
+                <span class="workspace-icon">N</span>
+                <span><strong>Northfield University</strong><small>Transport operations</small></span>
+                <svg class="chevron" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="m4 6 4 4 4-4" />
+                </svg>
+            </div>
+
+            <p class="nav-label">WORKSPACE</p>
+            <nav class="primary-nav">
+                <a class="nav-item active" href="#overview" aria-label="Overview"><span
+                        class="nav-icon">◫</span>Overview<span class="active-dot"></span></a>
+                <a class="nav-item" href="#routes" aria-label="Routes and fleet"><span class="nav-icon">⌁</span>Routes
+                    &amp; fleet</a>
+                <a class="nav-item" href="#demand" aria-label="Demand forecast"><span class="nav-icon">▥</span>Demand
+                    forecast</a>
+                <a class="nav-item" href="#recommendations" aria-label="Plan optimizer"><span
+                        class="nav-icon">✳</span>Plan optimizer<span class="nav-count">2</span></a>
+                <a class="nav-item" href="#method" aria-label="Scenarios"><span class="nav-icon">◷</span>Scenarios</a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-live"><span class="live-indicator"></span><span><strong>Simulation
+                            ready</strong><small>Deterministic scenario data</small></span></div>
+                <a class="nav-item help-link" href="#method"><span class="nav-icon">?</span>How this works</a>
+                <div class="profile">
+                    <span class="avatar">AM</span>
+                    <span><strong>Alex Morgan</strong><small>Fleet operator</small></span>
+                    <span class="profile-more">···</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content" id="overview">
+            <header class="topbar">
+                <div class="breadcrumb"><span>Operations</span><span class="breadcrumb-slash">/</span><strong>Network
+                        overview</strong></div>
+                <div class="topbar-right">
+                    <div class="service-status"><span class="live-indicator"></span>Simulation active</div>
+                    <span class="topbar-divider"></span>
+                    <span class="date-label" id="today-label">WEEKDAY SIM</span>
+                    <button class="icon-button notification-button" id="notification-button"
+                        aria-label="Notifications"><span>♧</span><i></i></button>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <section class="welcome-row">
+                    <div>
+                        <div class="eyebrow"><span class="eyebrow-line"></span>WEEKDAY SERVICE · PEAK WINDOW</div>
+                        <h1>Move smarter.<span class="purpose-line" id="purpose-line">Predict arrival windows.</span>
+                        </h1>
+                        <p class="welcome-copy">Plan reliable arrivals, balance passenger demand, and keep campus
+                            connections feasible—even when service is disrupted.
+                        </p>
+                    </div>
+                    <div class="welcome-actions">
+                        <label class="scenario-select-wrap" for="scenario-select"><span>SCENARIO</span>
+                            <select id="scenario-select" aria-label="Choose a transport scenario">
+                                <option value="normal">Normal operations</option>
+                                <option value="traffic">Traffic delay · +12 min</option>
+                                <option value="surge">Demand spike · +35%</option>
+                                <option value="offline">Vehicle unavailable · 1 bus</option>
+                                <option value="campusEvent">Campus event · Science Quad</option>
+                            </select>
+                        </label>
+                        <button class="button-primary" id="optimize-button"><span class="sparkle">✳</span> Optimize plan
+                            <span class="button-shortcut">↗</span></button>
+                    </div>
+                </section>
+
+                <section class="kpi-grid" aria-label="Network performance">
+                    <article class="kpi-card">
+                        <div class="kpi-top"><span class="kpi-label">ON-TIME TRIPS</span><span
+                                class="kpi-icon green-icon">↗</span></div>
+                        <div class="kpi-value"><span id="ontime-value">87.4</span><span class="kpi-unit">%</span></div>
+                        <div class="kpi-foot"><span class="trend-up" id="ontime-change">↑ 6.8 pts</span><span>vs.
+                                baseline schedule</span>
+                        </div>
+                        <div class="kpi-sparkline spark-green" aria-hidden="true"><svg viewBox="0 0 120 28"
+                                preserveAspectRatio="none">
+                                <path d="M0 22 14 18 26 21 39 12 52 17 65 9 79 13 93 5 107 10 120 2" />
+                            </svg></div>
+                    </article>
+                    <article class="kpi-card">
+                        <div class="kpi-top"><span class="kpi-label">AVG. WAIT TIME</span><span
+                                class="kpi-icon yellow-icon">◷</span></div>
+                        <div class="kpi-value"><span id="wait-value">10.6</span><span class="kpi-unit"> min</span></div>
+                        <div class="kpi-foot"><span class="trend-up" id="wait-change">0/0 boardings
+                                served</span><span>vs.
+                                baseline schedule</span>
+                        </div>
+                        <div class="kpi-sparkline spark-yellow" aria-hidden="true"><svg viewBox="0 0 120 28"
+                                preserveAspectRatio="none">
+                                <path d="m0 4 14 3 12-2 13 6 13-1 13 7 14-2 14 6 14-4 17 7" />
+                            </svg></div>
+                    </article>
+                    <article class="kpi-card">
+                        <div class="kpi-top"><span class="kpi-label">FLEET DEPLOYED</span><span
+                                class="kpi-icon blue-icon">▤</span></div>
+                        <div class="kpi-value"><span id="util-value">80</span><span class="kpi-unit">%</span></div>
+                        <div class="kpi-foot"><span class="neutral-tag" id="fleet-count">6 / 15
+                                vehicles</span><span>scheduled
+                                in window</span></div>
+                        <div class="kpi-sparkline spark-blue" aria-hidden="true"><svg viewBox="0 0 120 28"
+                                preserveAspectRatio="none">
+                                <path d="m0 20 14-5 12 3 13-9 13 6 13-3 14 5 14-10 14 2 17-7" />
+                            </svg></div>
+                    </article>
+                    <article class="kpi-card">
+                        <div class="kpi-top"><span class="kpi-label">CAPACITY ALERTS</span><span
+                                class="kpi-icon red-icon">!</span></div>
+                        <div class="kpi-value"><span id="alert-value">0</span><span class="kpi-unit"> alerts</span>
+                        </div>
+                        <div class="kpi-foot"><span class="alert-tag"><span class="alert-dot"></span><span
+                                    id="alert-caption">No service alerts</span></span><span>evaluation window</span>
+                        </div>
+                        <div class="kpi-sparkline spark-red" aria-hidden="true"><svg viewBox="0 0 120 28"
+                                preserveAspectRatio="none">
+                                <path d="m0 23 14-1 12-4 13 5 13-10 13 3 14-8 14 6 14-11 17 3" />
+                            </svg></div>
+                    </article>
+                </section>
+
+                <section class="network-section">
+                    <div class="section-heading">
+                        <div>
+                            <h2>Network, at a glance</h2>
+                            <p>Simulated vehicle positions and predicted arrivals across campus</p>
+                        </div>
+                        <div class="section-heading-right"><span class="updated-label"><span
+                                    class="live-indicator"></span>Fixed scenario run</span><button class="text-button"
+                                id="map-focus-button">Focus map <span>↗</span></button></div>
+                    </div>
+                    <div class="network-grid">
+                        <article class="map-card">
+                            <div class="map-toolbar">
+                                <div class="map-title"><span class="map-live-dot"></span><strong>Northfield
+                                        campus</strong><span class="map-live-badge">SIMULATED GPS</span></div><button
+                                    class="map-menu" id="map-menu" aria-label="Toggle map stop labels">···</button>
+                            </div>
+                            <div class="map-canvas">
+                                <div class="map-grid" aria-hidden="true"></div>
+                                <div class="map-water"></div>
+                                <div class="campus-label campus-library">LIBRARY</div>
+                                <div class="campus-label campus-science">SCIENCE<br>QUAD</div>
+                                <div class="campus-label campus-student">STUDENT<br>CENTER</div>
+                                <div class="campus-label campus-sports">ATHLETICS</div>
+                                <div class="campus-label campus-north">NORTH GATE</div>
+                                <svg class="route-map" viewBox="0 0 780 330" preserveAspectRatio="none" role="img"
+                                    aria-label="Schematic campus route map with three color-coded routes and simulated vehicle positions">
+                                    <path class="route-shadow"
+                                        d="M78 260 130 220 200 222 257 160 340 157 390 104 500 112 560 61 696 66" />
+                                    <path class="route-line route-one"
+                                        d="M78 260 130 220 200 222 257 160 340 157 390 104 500 112 560 61 696 66" />
+                                    <path class="route-shadow"
+                                        d="M120 68 174 103 215 150 257 160 310 214 401 214 473 258 586 263 696 216" />
+                                    <path class="route-line route-two"
+                                        d="M120 68 174 103 215 150 257 160 310 214 401 214 473 258 586 263 696 216" />
+                                    <path class="route-shadow"
+                                        d="M120 68 217 72 301 108 390 104 454 150 500 112 586 124 652 164 696 216 696 278" />
+                                    <path class="route-line route-three"
+                                        d="M120 68 217 72 301 108 390 104 454 150 500 112 586 124 652 164 696 216 696 278" />
+                                    <g class="map-stops">
+                                        <circle cx="78" cy="260" r="4" />
+                                        <circle cx="257" cy="160" r="4" />
+                                        <circle cx="390" cy="104" r="4" />
+                                        <circle cx="560" cy="61" r="4" />
+                                        <circle cx="696" cy="66" r="4" />
+                                        <circle cx="120" cy="68" r="4" />
+                                        <circle cx="401" cy="214" r="4" />
+                                        <circle cx="586" cy="263" r="4" />
+                                        <circle cx="696" cy="216" r="4" />
+                                        <circle cx="696" cy="278" r="4" />
+                                    </g>
+                                </svg>
+                                <button class="vehicle-marker vehicle-a"
+                                    aria-label="Simulated Route A vehicle position"><span>↗</span></button>
+                                <button class="vehicle-marker vehicle-b"
+                                    aria-label="Simulated Route B vehicle position"><span>↗</span></button>
+                                <button class="vehicle-marker vehicle-c"
+                                    aria-label="Simulated Route C vehicle position"><span>↗</span></button>
+                                <div class="map-scale">SCHEMATIC · NOT TO SCALE</div>
+                                <div class="map-zoom" aria-label="Map zoom controls">
+                                    <button id="map-zoom-in" aria-label="Zoom in">＋</button>
+                                    <button id="map-zoom-out" aria-label="Zoom out">－</button>
+                                </div>
+                            </div>
+                            <div class="map-legend">
+                                <div class="legend-routes"><span><i class="legend-line line-green"></i>Route
+                                        A</span><span><i class="legend-line line-purple"></i>Route B</span><span><i
+                                            class="legend-line line-orange"></i>Route C</span></div>
+                                <span class="map-assumption">GPS traces · 30 sec sample</span>
+                            </div>
+                        </article>
+
+                        <article class="arrivals-card">
+                            <div class="arrivals-heading">
+                                <div>
+                                    <h3>Next arrivals</h3>
+                                    <p>Predicted at key stops</p>
+                                </div><button class="subtle-link" id="all-arrivals-button">All routes
+                                    <span>↗</span></button>
+                            </div>
+                            <div class="arrivals-list" id="arrivals-list">
+                                <div class="arrival-row"><span class="route-badge badge-a">A</span><span
+                                        class="arrival-info"><strong>North Gate</strong><small>via Library · Bus
+                                            04</small></span><span class="arrival-time"><strong id="arrival-a-time">3–5
+                                            <small>min</small></strong><small class="arrival-reliability">± 1
+                                            min</small></span></div>
+                                <div class="arrival-row"><span class="route-badge badge-b">B</span><span
+                                        class="arrival-info"><strong>Student Center</strong><small>via Science Quad ·
+                                            Bus 09</small></span><span class="arrival-time"><strong
+                                            id="arrival-b-time">6–8 <small>min</small></strong><small
+                                            class="arrival-reliability">± 2 min</small></span></div>
+                                <div class="arrival-row"><span class="route-badge badge-c">C</span><span
+                                        class="arrival-info"><strong>West Residence</strong><small>via Athletics · Bus
+                                            12</small></span><span class="arrival-time"><strong id="arrival-c-time">9–11
+                                            <small>min</small></strong><small class="arrival-reliability">± 1
+                                            min</small></span></div>
+                            </div>
+                            <div class="eta-quality">
+                                <div class="eta-quality-top"><span>HELD-OUT ETA ERROR</span><span class="eta-value"
+                                        id="eta-error-value">2.1 min MAE</span></div>
+                                <div class="accuracy-track" role="img"
+                                    aria-label="Held-out ETA mean absolute error is 2.1 minutes against a 3-minute target">
+                                    <span></span></div>
+                                <p>10 held-out trips · 3-minute target <button class="info-dot"
+                                        aria-label="ETA method info"
+                                        title="Rolling median of five synthetic remaining-time observations sampled every 30 seconds, with scenario delay added. Evaluated against simulated ground truth.">i</button>
+                                </p>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+
+                <div class="lower-grid">
+                    <section class="routes-section panel" id="routes">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Routes in service</h2>
+                                <p>Departure windows · 8:00–10:00 AM</p>
+                            </div><button class="more-button" id="routes-more-button"
+                                aria-label="Show all route schedules">···</button>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ROUTE / VEHICLE</th>
+                                        <th>NEXT DEPARTURE</th>
+                                        <th>LOAD / CAPACITY</th>
+                                        <th>STATUS</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="routes-table">
+                                    <tr data-route-id="A">
+                                        <td><span class="table-route"><i
+                                                    class="route-dot route-dot-a"></i><span><strong>Route
+                                                        A</strong><small>Bus 04 · 40 seats</small></span></span></td>
+                                        <td><strong>08:15</strong><small class="table-sub">ETA 08:28–08:30</small></td>
+                                        <td><span class="load-value">27 <small>/ 40</small></span><span
+                                                class="load-track"><i class="load-green" style="width:68%"></i></span>
+                                        </td>
+                                        <td><span class="status-pill status-on-time">On time</span></td>
+                                    </tr>
+                                    <tr data-route-id="B">
+                                        <td><span class="table-route"><i
+                                                    class="route-dot route-dot-b"></i><span><strong>Route
+                                                        B</strong><small id="route-b-vehicle">Bus 09 · 32
+                                                        seats</small></span></span></td>
+                                        <td><strong>08:20</strong><small class="table-sub">ETA 08:34–08:37</small></td>
+                                        <td><span class="load-value" id="route-b-load">29 <small>/
+                                                    32</small></span><span class="load-track"><i class="load-red"
+                                                    id="route-b-bar" style="width:91%"></i></span></td>
+                                        <td><span class="status-pill status-crowded" id="route-b-status">Near
+                                                capacity</span></td>
+                                    </tr>
+                                    <tr data-route-id="C">
+                                        <td><span class="table-route"><i
+                                                    class="route-dot route-dot-c"></i><span><strong>Route
+                                                        C</strong><small>Bus 12 · 40 seats</small></span></span></td>
+                                        <td><strong>08:30</strong><small class="table-sub">ETA 08:43–08:45</small></td>
+                                        <td><span class="load-value">22 <small>/ 40</small></span><span
+                                                class="load-track"><i class="load-blue" style="width:55%"></i></span>
+                                        </td>
+                                        <td><span class="status-pill status-on-time">On time</span></td>
+                                    </tr>
+                                    <tr data-route-id="D">
+                                        <td><span class="table-route"><i
+                                                    class="route-dot route-dot-d"></i><span><strong>Route
+                                                        D</strong><small>Bus 07 · 32 seats</small></span></span></td>
+                                        <td><strong>08:35</strong><small class="table-sub">ETA 08:49–08:52</small></td>
+                                        <td><span class="load-value">18 <small>/ 32</small></span><span
+                                                class="load-track"><i class="load-purple" style="width:56%"></i></span>
+                                        </td>
+                                        <td><span class="status-pill status-on-time">On time</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="table-footer"><span><span class="table-live-dot"></span> 4 of 6 routes
+                                shown</span><button id="view-all-routes">View route schedule <span>↗</span></button>
+                        </div>
+                    </section>
+
+                    <section class="demand-section panel" id="demand">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Demand outlook</h2>
+                                <p>Expected boardings by 15-min window</p>
+                            </div><button class="chart-period" id="chart-period-button">Next 2 hours
+                                <span>⌄</span></button>
+                        </div>
+                        <div class="chart-summary"><strong id="demand-total">294</strong><span>expected
+                                boardings</span><span class="chart-peak"><i></i> Peak at 8:30</span></div>
+                        <div class="demand-chart" id="demand-chart" role="img"
+                            aria-label="Bar chart showing forecast campus transit demand, peaking at 8:30 AM">
+                            <div class="chart-y-axis">
+                                <span>80</span><span>60</span><span>40</span><span>20</span><span>0</span>
+                            </div>
+                            <div class="chart-plot">
+                                <div class="chart-gridline grid-80"></div>
+                                <div class="chart-gridline grid-60"></div>
+                                <div class="chart-gridline grid-40"></div>
+                                <div class="chart-gridline grid-20"></div>
+                                <div class="chart-bars">
+                                    <div class="bar-column">
+                                        <div class="bar-value">34</div><i style="height:43%"></i><span>8:00</span>
+                                    </div>
+                                    <div class="bar-column">
+                                        <div class="bar-value">56</div><i style="height:70%"></i><span>8:15</span>
+                                    </div>
+                                    <div class="bar-column peak-bar">
+                                        <div class="bar-value">71</div><i style="height:89%"></i><span>8:30</span>
+                                    </div>
+                                    <div class="bar-column">
+                                        <div class="bar-value">55</div><i style="height:69%"></i><span>8:45</span>
+                                    </div>
+                                    <div class="bar-column">
+                                        <div class="bar-value">39</div><i style="height:49%"></i><span>9:00</span>
+                                    </div>
+                                    <div class="bar-column">
+                                        <div class="bar-value">21</div><i style="height:26%"></i><span>9:15</span>
+                                    </div>
+                                    <div class="bar-column">
+                                        <div class="bar-value">11</div><i style="height:14%"></i><span>9:30</span>
+                                    </div>
+                                    <div class="bar-column">
+                                        <div class="bar-value">7</div><i style="height:9%"></i><span>9:45</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="forecast-foot"><span><span class="forecast-dot"></span>FORECAST</span><span>
+                                Synthetic weekday + stop counts</span></div>
+                    </section>
+                </div>
+
+                <section class="recommendations-section" id="recommendations">
+                    <div class="section-heading recommendation-heading">
+                        <div>
+                            <h2>Recommended adjustments</h2>
+                            <p>Feasible moves, ranked by network impact</p>
+                        </div><span class="recommendation-count"><span>✳</span> 2 opportunities</span>
+                    </div>
+                    <p class="proposed-load-summary" id="proposed-load-summary" aria-live="polite" hidden></p>
+                    <div class="recommendation-grid" id="recommendation-grid">
+                        <article class="recommendation-card">
+                            <div class="rec-topline"><span class="rec-type"><span>↗</span> VEHICLE
+                                    REALLOCATION</span><span class="impact-tag">HIGH IMPACT</span></div>
+                            <h3>Allocate spare capacity to Route B</h3>
+                            <p>Dispatch spare Bus 15 on an 8:30 supplemental trip. Keep Route B's 8:20 departure; the
+                                additional trip covers forecast overflow within the 40-seat limit.</p>
+                            <div class="rec-metrics">
+                                <div><span>UNMET BOARDINGS RESOLVED</span><strong>0 <small>boardings</small></strong>
+                                </div>
+                                <div><span>WAIT TIME</span><strong>−4.2 <small>min</small></strong></div>
+                                <div><span>CAPACITY</span><strong>32 + 8 <small>/ 32 + 40 seats</small></strong></div>
+                            </div>
+                            <div class="rec-footer"><span class="feasible-check">✓ Constraint checked</span><button
+                                    class="apply-button" id="apply-recommendation">Apply adjustment
+                                    <span>→</span></button></div>
+                        </article>
+                        <article class="recommendation-card rec-secondary">
+                            <div class="rec-topline"><span class="rec-type"><span>◷</span> TIMETABLE TWEAK</span><span
+                                    class="impact-tag impact-medium">MEDIUM IMPACT</span></div>
+                            <h3>Protect the Science Quad connection</h3>
+                            <p>Hold Route C for 3 minutes at Library. This protects 8 forecast Route A transfers within
+                                the 5-minute scheduled slack.</p>
+                            <div class="rec-metrics">
+                                <div><span>MISSED TRANSFERS</span><strong>0 <small>riders</small></strong></div>
+                                <div><span>HOLD TIME</span><strong>3 <small>min</small></strong></div>
+                                <div><span>NEXT TRIP</span><strong>+0 <small>delay</small></strong></div>
+                            </div>
+                            <div class="rec-footer"><span class="feasible-check">✓ Timetable feasible</span><button
+                                    class="apply-button secondary-apply" id="apply-connection">Apply full plan
+                                    <span>→</span></button></div>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="comparison-panel" aria-label="Baseline comparison">
+                    <div class="comparison-copy"><span class="comparison-icon">↗</span>
+                        <div><strong>Simulated plan vs. baseline schedule</strong>
+                            <p>Same synthetic demand and GPS traces · fixed 8:00–10:00 AM window</p>
+                        </div>
+                    </div>
+                    <div class="comparison-stat"><span>WAITING TIME</span><strong
+                            id="compare-wait">−30<span>%</span></strong></div>
+                    <div class="comparison-stat"><span>ON-TIME TRIPS</span><strong id="compare-ontime">+6.8<span>
+                                pts</span></strong></div>
+                    <div class="comparison-stat"><span>HARD CONSTRAINT VIOLATIONS</span><strong
+                            id="compare-capacity">0<span>
+                                hard</span></strong></div>
+                    <div class="comparison-stat"><span>UNMET BOARDINGS</span><strong id="compare-unmet">0 → 0</strong>
+                    </div>
+                    <button class="comparison-link" id="export-run">Export run CSV <span>↓</span></button>
+                    <button class="comparison-link" id="comparison-details">See methodology <span>↗</span></button>
+                </section>
+
+                <details class="method-panel" id="method">
+                    <summary><span class="method-icon">i</span><span><strong>Methodology &amp;
+                                assumptions</strong><small>Transparent inputs, constraints, and evaluation
+                                window</small></span><span class="method-toggle">＋</span></summary>
+                    <div class="method-content">
+                        <div><strong>ETA estimation</strong>
+                            <p>Five synthetic remaining-time observations per route are sampled every 30 seconds. The
+                                rolling median is widened by one minute at each end; the traffic scenario adds its delay
+                                to the same trace-based estimate. Held-out mean absolute error is 2.1 minutes across 10
+                                simulated trips. The route diagram is schematic and not to scale.</p>
+                        </div>
+                        <div><strong>Hard constraints</strong>
+                            <p>Passenger allocation cannot exceed seated vehicle capacity (Route B: 32 seats, spare Bus
+                                15: 40 seats). The optimizer checks spare-vehicle conflicts, arrival plus 5-minute
+                                turnaround between consecutive trips, departures inside 8:00–10:00, and connection
+                                holds against 5 minutes of slack.</p>
+                        </div>
+                        <div><strong>Baseline &amp; improvement</strong>
+                            <p>Baseline is the modeled weekday timetable and vehicle assignment defined for this
+                                simulation. Each scenario compares its
+                                baseline with the proposed plan on the same synthetic weekday, using the fixed
+                                8:00–10:00 AM window. Waiting time is weighted by simulated rider counts; on-time
+                                percentage is calculated from GPS-trace trip runtimes with a 5-minute tolerance. These
+                                are reproducible synthetic results, not live fleet measurements.</p>
+                        </div>
+                        <div><strong>Demand forecast</strong>
+                            <p>Boardings are forecast by stop and 15-minute window using synthetic weekday counts.
+                                Disruption controls modify route runtime, passenger demand, or vehicle availability.
+                                The campus-event scenario adds 24 reproducible synthetic riders at Science Quad in the
+                                08:30 window.
+                                Stop-only passenger cohorts board the first available service at that stop; destinations
+                                and alighting are not modeled, so onboard loads are conservatively carried to the end
+                                of a trip. The transfer cohort is added to the demand forecast. No live fleet or student
+                                data is used.</p>
+                        </div>
+                        <div class="method-service">
+                            <strong>Modeled route and schedule data</strong>
+                            <p><b>Route A</b> · Bus 04 · 40 seats · North Gate → Library → Student Center · 08:15,
+                                08:45, 09:15, 09:45<br>
+                                <b>Route B</b> · Bus 09 · 32 seats · West Residence → Science Quad → Student Center ·
+                                08:20, 08:50, 09:20, 09:50; proposed spare-bus trips at 08:30 and 09:00<br>
+                                <b>Route C</b> · Bus 12 · 40 seats · Library → Athletics → West Residence · 08:30,
+                                09:00, 09:30<br>
+                                <b>Route D</b> · Bus 07 · 32 seats · North Gate → Science Quad → Athletics · 08:35,
+                                09:05, 09:35<br>
+                                <b>Routes E/F</b> · Bus 02/06 · 40 seats each · Library → West Residence / Student
+                                Center → Athletics · 08:40–09:40 / 08:50–09:50. Spare Bus 15 has 40 seats.
+                            </p>
+                        </div>
+                    </div>
+                </details>
+                <footer class="page-footer"><span>ROUTEPULSE <span class="footer-divider">·</span> HACKATHON
+                        MVP</span><span>All figures use reproducible simulated campus data</span></footer>
+            </div>
+        </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+
+</html>
